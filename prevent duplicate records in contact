@@ -1,0 +1,23 @@
+trigger ContactDuplicate on Contact(before insert) 
+{
+	// set to store email ids
+	set<string> emailset = new set<string>();
+    // set to store phone numbers
+    set<String> phoneset = new set<String>();
+    // iterate through each contact and their email and phone numbers
+    for(contact con : trigger.new){
+        emailset.add(con.email);
+        phoneset.add(con.phone);
+    }
+    //new list to store the found email or phone numbers
+    list<Contact> contactList = new List<Contact>();
+    // populating the list using soql
+    contactList = [select email, phone from contact where email in : emailset or phone in : phoneset];
+    // iterating through each contact record to see if the same email or phone was found 
+    for(contact con : trigger.new){
+        if(contactList.size()>0){
+            // Displaying error
+            con.email.adderror('duplicate contact found');
+        }
+    }
+}
