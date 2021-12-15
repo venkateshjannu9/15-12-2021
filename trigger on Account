@@ -1,0 +1,24 @@
+trigger AccountDuplicate on Account(before insert,before update) 
+{
+	// set to store Industry ids
+	set<String> industryset = new set<String>();
+    // set to store phone numbers
+    set<String> phoneset = new set<string>();
+    // iterating through each account and their Industry and phone fields 
+    for(Account acc : trigger.new){
+        industryset.add(acc.Industry);
+        phoneset.add(acc.Phone);
+    }
+    // create a new list to store industry and phone fields 
+    List<Account> acclist = new list<Account>();
+    // write a soql ti fetch data from account
+    acclist = [select id, name ,Industry, phone from Account where Industry in : industryset or phone in : phoneset];
+    // iterating through each account record to see if the same industry or phone was found
+    for(Account acc : trigger.new){
+        if(acclist.size()>0)
+        {
+            // display error
+            acc.phone.adderror('duplicate account found');
+        }
+    }
+}
